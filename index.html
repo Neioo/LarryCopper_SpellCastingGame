@@ -1,0 +1,80 @@
+<!DOCTYPE html> 
+<!-- sdsddsd -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>LARRY COPPER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body id="title">
+    <!-- TITLE SCREEN -->
+    <section class="title-screen">
+      <img src="assets/images/lc-title.png" alt="LARRYs COPPER" class="title-logo" />
+        <p class="subtitle" style="color: #ececec;"> GESTURE SPELL-CASTING ARENA</p>
+
+        <a class="btn1" href="#game">PRESS TO PLAY</a>
+        <a class="btn1" href="howto.html">HOW TO PLAY</a>
+    </section>
+
+    <!-- GAME SCREEN (UI ONLY) -->
+    <main class="game" id="game">
+      <div class="hud">
+        <div class="logo">LARRY COPPER</div>
+      </div>
+
+      <div class="board">
+        <!-- Left: Player canvas -->
+
+        <div class="panel player">
+          <span class="label">Player</span>
+          <div class="hp-num">100</div>
+          <canvas id="playerCanvas" width="200" height="200"></canvas>
+        </div>
+
+        <!-- Center: Arena/Spells canvas (big) -->
+        <div class="panel big arena">
+          <span class="label">Spell Arena</span>
+          <canvas id="arenaCanvas" width="720" height="400"></canvas>
+        </div>
+
+        <!-- Right: Enemy canvas -->
+        <div class="panel enemy">
+          <span class="label">Enemy</span>
+          <div class="hp-num">100</div>
+          <canvas id="enemyCanvas" width="200" height="200"></canvas>
+        </div>
+
+        <!-- Bottom: Camera / Hand Preview placeholder -->
+        <div class="panel camera">
+        <div class="cam-wrap">
+            <video id="cam" autoplay playsinline muted></video>
+            <canvas id="handsOverlay"></canvas>
+        </div>
+        </div>
+
+
+
+      <div id="gameOver" class="overlay hidden">
+        <div class="overlay-card">
+          <h2>GAME OVER</h2>
+          <p id="goMsg">You lost!</p>
+          <button id="restartBtn" class="btn">Restart</button>
+        </div>
+      </div>
+    </main>
+
+<script type="module" src="spells.js"></script>
+<script type="module" src="spells_config.js"></script>
+<script type="module" src="script.js"></script>
+<script type="module" src="enemy.js"></script>
+<script type="module" src="enemy_ai.js"></script>
+<script type="module" src="hand_gestures.js"></script>
+
+
+  </body>
+</html>

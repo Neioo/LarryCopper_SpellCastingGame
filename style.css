@@ -1,0 +1,449 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+:root {
+  --bg: #0e0f14;
+  --panel: #1a1c24;
+  --ink: #e8ecf1;
+  --muted: #9aa3b2;
+  --accent: #5ee1ff;
+  --line: #2a2d39;
+  --radius: 16px;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  background: linear-gradient(180deg, #0b0c11, #12141b 60%, #0b0c11);
+  color: var(--ink);
+  font-family: "Press Start 2P", cursive;
+  text-align: center;
+  height: 100%;
+}
+
+.menu p {
+  font-family: "Press Start 2P", cursive;
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 1px 1px 0 #000000, -1px 1px 0 #000000, 1px -1px 0 #000000,
+    -1px -1px 0 #000000;
+}
+
+/* Highlighted option */
+.menu p.selected {
+  color: #ffcc66; /* gold/yellow highlight */
+}
+
+/* ---------- Title Screen ---------- */
+.title-screen {
+  position: fixed;
+  inset: 0;
+  background: url("assets/images/bg-img.png") top/cover no-repeat;
+  text-align: center;
+  display: block;
+  padding-top: 120px;
+}
+.title-screen img,
+.title-screen .subtitle {
+  margin-top: 0px;
+}
+.title-screen .btn,
+.title-screen .start-note {
+  display: block;
+  margin: 8px auto;
+}
+
+.title-logo {
+  max-width: 600px; /* scale down if needed */
+  width: 80%; /* responsive */
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.card {
+  width: min(820px, 92vw);
+  padding: 48px 36px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #171923, #141723);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+.title {
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.95;
+  letter-spacing: 0.06em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  font-weight: 900;
+  background: linear-gradient(90deg, #8ff5ff, #9d7bff 40%, #ffa3e8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0 0 28px;
+  font-size: clamp(14px, 2.2vw, 18px);
+}
+
+.btn1 {
+  display: block;
+  padding: 14px 24px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: none;
+  transition: transform 0.06s ease, color 0.2s ease;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.btn1:hover {
+  transform: translateY(-1px);
+  color: #ffcc66; /* highlight on hover */
+}
+
+.btn1:active {
+  transform: translateY(0);
+}
+
+.start-note {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ---------- Game Screen (UI ONLY) ---------- */
+.game {
+  display: none;
+  width: min(1100px, 96vw);
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: rgba(18, 20, 27, 0.6);
+  border-radius: 24px;
+  backdrop-filter: blur(6px);
+  position: relative;
+}
+.hud {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.hud .logo {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #cfe7ff;
+  text-transform: uppercase;
+}
+.hud .pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #1f2330;
+  border: 1px solid #303547;
+  color: #9fb3d1;
+  font-size: 12px;
+}
+
+.board {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 200px 1fr 200px; /* left small | big center | right small */
+  grid-template-rows: auto auto; /* top row = canvases, second row = camera panel */
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 160px;
+}
+.panel.big {
+  min-height: 400px;
+}
+.panel .label {
+  position: absolute;
+  top: 16px;
+  left: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: #151823;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #2a2e3c;
+}
+
+/* The three canvases (placeholders only) */
+.player {
+  grid-column: 1;
+  grid-row: 1;
+}
+.arena {
+  grid-column: 2;
+  grid-row: 1;
+}
+.enemy {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+/* Camera / hand preview placeholder */
+.camera {
+  grid-column: 1 / 4;
+  grid-row: 2;
+  min-height: 260px;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 12px;
+  background: #0f1118;
+  outline: 1px dashed #2a2d39;
+  image-rendering: pixelated;
+}
+
+.placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: #0b0d13;
+  outline: 1px dashed #2a2d39;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5f6b83;
+}
+
+/* Footer */
+.foot {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+.link {
+  color: #8fb6ff;
+  text-decoration: none;
+  margin-left: 8px;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- CSS-only screen toggle ---------- */
+:target.game {
+  display: block;
+}
+:target ~ .title-screen {
+  display: none;
+}
+/* === 8-bit numeric HP badges (no bars) === */
+.hp-num {
+  position: absolute;
+  top: 8px;
+  right: 10px; /* sits top-right so it doesn't clash with .label (top-left) */
+  padding: 4px 6px;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #b9d7ff;
+  background: #121a2a;
+  border: 2px solid #2f405f;
+  box-shadow: 0 0 0 2px #000, 0 4px 0 #000;
+  text-shadow: 0 2px 0 #000;
+  image-rendering: pixelated;
+}
+
+/* --- Game Over overlay --- */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 50;
+}
+.overlay.hidden {
+  display: none;
+}
+.overlay-card {
+  text-align: center;
+  padding: 20px 22px;
+  background: #121a2a;
+  border: 2px solid #2f405f;
+  box-shadow: 0 0 0 2px #000, 0 10px 0 #000;
+  image-rendering: pixelated;
+}
+.overlay-card h2 {
+  margin: 0 0 8px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 18px;
+  color: #ff839d;
+  text-shadow: 0 2px 0 #000;
+}
+.overlay-card p {
+  margin: 0 0 14px;
+  color: #b9d7ff;
+  font-size: 12px;
+}
+.overlay-card .btn {
+  padding: 10px 16px;
+  border: 2px solid #3a4b66;
+  background: #1a2433;
+  color: #e8f3ff;
+  box-shadow: 0 0 0 2px #000, 0 4px 0 #000;
+  cursor: pointer;
+}
+
+.cam-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#cam,
+#handsOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+#cam {
+  transform: scaleX(-1);
+  image-rendering: pixelated;
+}
+#handsOverlay {
+  pointer-events: none;
+}
+/* Bigger camera panel */
+.panel.camera {
+  min-height: 480px; /* was ~260px — bump it up */
+}
+
+/* Stack video + overlay and mirror BOTH so they align */
+.cam-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+#cam,
+#handsOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+#cam {
+  transform: scaleX(-1);
+  image-rendering: pixelated;
+}
+#handsOverlay {
+  transform: scaleX(-1);
+  pointer-events: none;
+}
+
+/* If you want enemy HP on the left instead, uncomment this:
+.panel.enemy .hp-num { right:auto; left:10px; }
+*/
+.panel.camera .cam-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 960px; /* tweak as you like */
+  margin: 0 auto;
+  aspect-ratio: 16/9; /* keeps it nicely sized; remove if you prefer fixed height */
+}
+
+.cam-wrap video,
+.cam-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* or 'contain' if you don’t want cropping */
+  transform: scaleX(-1); /* MIRROR both so dots align with the video */
+}
+
+#handsOverlay {
+  pointer-events: none; /* overlay should never block clicks */
+}
+.panel.camera .cam-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+/* Stack & mirror BOTH so landmarks align */
+.cam-wrap video,
+.cam-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+.cam-wrap video {
+  z-index: 1;
+  background: #000; /* helps you see if video is there */
+}
+
+#handsOverlay {
+  z-index: 2;
+  pointer-events: none;
+  background: transparent; /* IMPORTANT: no opaque fill */
+}
+
+.howto-screen {
+  position: fixed;
+  inset: 0;
+  background: url("assets/images/bg-img.png") top/cover no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* horizontal centering */
+  justify-content: center; /* vertical centering */
+  text-align: center;
+  color: #ececec;
+  padding: 0; /* remove top padding */
+}
+
+.howto-screen h2 {
+  margin-bottom: 24px;
+  font-size: 20px;
+}
+
+.howto-screen ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 40px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.howto-screen li {
+  margin: 8px 0;
+}
