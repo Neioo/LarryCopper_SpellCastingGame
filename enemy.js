@@ -8,7 +8,7 @@ const CANVAS_HEIGHT = (canvas.height = 200);
 ctx.imageSmoothingEnabled = false;
 
 const playerImage = new Image();
-playerImage.src = "../assets/images/FoulMonk.png";
+playerImage.src = "assets/images/FoulMonk.png";
 const spriteWidth = 32;
 const spriteHeight = 32;
 

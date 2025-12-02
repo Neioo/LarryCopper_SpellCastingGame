@@ -412,18 +412,22 @@ function castFromPath() {
 
   if (spell && typeof window.spawnSpell === "function") {
     const end = path[path.length - 1];
-    const yMid = (arena?.height || overlay.height || 400) / 2;
-    if (spell === "fireball") {
-      window.spawnSpell("fireball", { x: 40, y: yMid, flip: false });
-    } else if (spell === "lightning") {
-      window.spawnSpell("lightning", { x: end?.x ?? 40, y: end?.y ?? yMid });
-    } else if (spell === "slash") {
-      window.spawnSpell("slash", { x: end?.x ?? 40, y: end?.y ?? yMid });
-    }
-  } else {
-    console.log("No clear match.");
-  }
 
+    // FORCE SAFE Y-COORDINATE (Center of screen)
+    // This guarantees the sprite is visible, regardless of canvas resizing issues
+    const safeY = 200;
+
+    console.log("CASTING:", spell); // Check console to confirm logic works
+
+    if (spell === "fireball") {
+      window.spawnSpell("fireball", { x: 40, y: safeY, flip: false });
+    } else if (spell === "lightning") {
+      // Use the hand's Y if available, otherwise default to safeY
+      window.spawnSpell("lightning", { x: end?.x ?? 40, y: end?.y ?? safeY });
+    } else if (spell === "slash") {
+      window.spawnSpell("wind", { x: end?.x ?? 40, y: end?.y ?? safeY });
+    }
+  }
   path.length = 0;
   setTimeout(() => (cooldown = false), COOLDOWN_MS);
 }

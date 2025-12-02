@@ -1,6 +1,6 @@
 export const SPELLS = {
   lightning: {
-    src: "../assets/images/shock.png",
+    src: "assets/images/shock.png",
     type: "gridTop",
     colsTop: 4, // how many frames across the top row (guess)
     rowsTotal: 8, // total rows in the image (top + bottom)
@@ -12,7 +12,7 @@ export const SPELLS = {
     damage: 10,
   },
   fireball: {
-    src: "../assets/images/fireball2.png",
+    src: "assets/images/fireball2.png",
     type: "gridTop",
     colsTop: 2, // top row shows 2 meteors
     rowsTotal: 2,
@@ -25,7 +25,7 @@ export const SPELLS = {
     damage: 10,
   },
   wind: {
-    src: "../assets/images/pixel_art_sword_slash_sprites.png",
+    src: "assets/images/pixel_art_sword_slash_sprites.png",
     type: "gridTop",
     colsTop: 3, // three slashes across the top row
     rowsTotal: 3,
