@@ -10,6 +10,9 @@ const overlay = document.getElementById("handsOverlay");
 const octx = overlay.getContext("2d");
 const arena = document.getElementById("arenaCanvas");
 
+// Global debounce counter for fist detection
+let fistFrameCount = 0;
+
 // ---------- Camera ----------
 async function startCamera() {
   video.muted = true;
@@ -23,7 +26,12 @@ async function startCamera() {
     audio: false,
   });
   video.srcObject = stream;
-  await video.play();
+  // Wait for metadata so we don't crash MediaPipe with 0-width video
+  return new Promise((resolve) => {
+    video.onloadedmetadata = () => {
+      video.play().then(resolve);
+    };
+  });
 }
 
 // ---------- MediaPipe Hands ----------
@@ -457,7 +465,13 @@ function drawSmoothPath(ctx, pts) {
 }
 
 function drawOverlay(landmarks) {
-  octx.clearRect(0, 0, overlay.width, overlay.height);
+  // Use destination-out to fade out the previous frame (Magic Trail effect)
+  octx.save();
+  octx.globalCompositeOperation = "destination-out";
+  octx.fillStyle = "rgba(0, 0, 0, 0.2)"; // Adjust this transparency for longer/shorter trails
+  octx.fillRect(0, 0, overlay.width, overlay.height);
+  octx.restore();
+
   if (path.length > 1) drawSmoothPath(octx, path);
 
   // debug landmarks (optional)
@@ -466,8 +480,9 @@ function drawOverlay(landmarks) {
     octx.fillStyle = "#00e5ff";
     const show = [0, 5, 9, 13, 17, 4, 8, 12, 16, 20];
     for (const i of show) {
-      const x = lm[i].x * overlay.width,
-        y = lm[i].y * overlay.height;
+      // MIRROR FIX: 1 - x
+      const x = (1 - lm[i].x) * overlay.width;
+      const y = lm[i].y * overlay.height;
       octx.beginPath();
       octx.arc(x, y, 2.5, 0, Math.PI * 2);
       octx.fill();
@@ -475,52 +490,87 @@ function drawOverlay(landmarks) {
   }
 }
 
-// ---------- Main loop ----------
-function onFrame(now) {
+// ---------- Main loop (THROTTLED & CRASH SAFE) ----------
+let lastVideoTime = -1;
+let lastProcessTime = 0;
+
+function onFrame() {
+  // 1. Keep the loop alive immediately
+  requestAnimationFrame(onFrame);
+
+  // 2. Throttle: Limit to ~30 FPS (every 33ms) to prevent freezing
+  const now = performance.now();
+  if (now - lastProcessTime < 33) return;
+  lastProcessTime = now;
+
   syncOverlaySize();
 
-  if (landmarker && video.readyState >= 2) {
-    const res = landmarker.detectForVideo(video, now);
-    const hands = res?.landmarks ?? [];
+  // 3. Crash Guard: Only run if video is loaded and has dimensions
+  if (
+    landmarker &&
+    video.readyState >= 2 &&
+    video.videoWidth > 0 &&
+    video.videoHeight > 0
+  ) {
+    // Only detect if the video frame has actually updated
+    if (video.currentTime !== lastVideoTime) {
+      lastVideoTime = video.currentTime;
 
-    if (hands.length) {
-      lostFrames = 0;
-      const lm = hands[0];
-      const rawX = lm[8].x * overlay.width;
-      const rawY = lm[8].y * overlay.height;
-      const fx = euroX.filter(rawX, now);
-      const fy = euroY.filter(rawY, now);
-
-      const pointing = isPointing(lm);
-      const fist = isFist(lm);
-
-      if (pointing) {
-        if (!drawing) {
-          drawing = true;
-          path.length = 0;
-          speedEMA = 0;
-        }
-        addPointAdaptive({
-          x: clamp(fx, 0, overlay.width),
-          y: clamp(fy, 0, overlay.height),
-        });
-      } else if (fist && drawing) {
-        drawing = false;
-        castFromPath();
+      let res = null;
+      try {
+        res = landmarker.detectForVideo(video, now);
+      } catch (e) {
+        // Silently skip if MediaPipe isn't ready for this specific frame timestamp
       }
 
-      drawOverlay(hands);
-    } else {
-      // tolerate brief loss
-      lostFrames++;
-      if (lostFrames > 8 && path.length > 6) path.shift();
-      drawOverlay(null);
+      const hands = res?.landmarks ?? [];
+
+      if (hands.length) {
+        lostFrames = 0;
+        const lm = hands[0];
+
+        // MIRROR FIX: Flip X coordinate (1 - x)
+        const rawX = (1 - lm[8].x) * overlay.width;
+        const rawY = lm[8].y * overlay.height;
+
+        const fx = euroX.filter(rawX, now);
+        const fy = euroY.filter(rawY, now);
+
+        const pointing = isPointing(lm);
+        const fist = isFist(lm);
+
+        // --- DEBOUNCE LOGIC ---
+        if (pointing) {
+          fistFrameCount = 0; // Reset
+          if (!drawing) {
+            drawing = true;
+            path.length = 0;
+            speedEMA = 0;
+          }
+          addPointAdaptive({
+            x: clamp(fx, 0, overlay.width),
+            y: clamp(fy, 0, overlay.height),
+          });
+        } else if (fist) {
+          fistFrameCount++;
+          // Wait 5 frames to confirm fist (fixes accidentally breaking lines)
+          if (drawing && fistFrameCount > 5) {
+            drawing = false;
+            castFromPath();
+            fistFrameCount = 0;
+          }
+        }
+        // ----------------------
+
+        drawOverlay(hands);
+      } else {
+        // tolerate brief loss
+        lostFrames++;
+        if (lostFrames > 8 && path.length > 6) path.shift();
+        drawOverlay(null);
+      }
     }
   }
-
-  video.requestVideoFrameCallback(({ mediaTime }) =>
-    onFrame(performance.now())
-  );
 }
 
 // ---------- Bootstrap ----------
@@ -529,9 +579,8 @@ function onFrame(now) {
     await startCamera();
     await loadLandmarker();
     syncOverlaySize();
-    video.requestVideoFrameCallback(({ mediaTime }) =>
-      onFrame(performance.now())
-    );
+    // Start the new safe loop
+    onFrame();
   } catch (e) {
     console.error(e);
     const ph = document.createElement("div");
