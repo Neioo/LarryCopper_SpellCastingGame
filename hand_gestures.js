@@ -321,7 +321,7 @@ function circleLike(pts) {
   // thresholds tuned to be forgiving
   const round = rStd / (rMean + 1e-6) < 0.35;
   const big = rMean > 30;
-  const sweep = absAngle > Math.PI * 1.7; // ~306°
+  const sweep = absAngle > Math.PI * 1.3; // ~306°
   return round && big && sweep;
 }
 function jaggedLike(pts) {
@@ -334,7 +334,7 @@ function straightLike(pts) {
   if (pts.length < 8) return false;
   const turns = totalTurnAbs(pts);
   const aspect = bboxAspect(pts);
-  return turns < 0.8 && aspect > 2.0;
+  return turns < 2.5 && aspect > 1.2;
 }
 
 // ---------- $1 recognition (fallback) ----------
