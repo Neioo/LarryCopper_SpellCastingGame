@@ -1,5 +1,5 @@
-// hand_gestures.js — One Euro + adaptive sampling + Catmull–Rom
-// with robust classification: Circle / Zig-Zag / Line BEFORE $1 fallback.
+// hand_gestures.js — FIXED VERSION
+// Retains Smoothness of Code 1, but fixes Trigger & Coordinates from Code 2
 import {
   FilesetResolver,
   HandLandmarker,
@@ -9,9 +9,6 @@ const video = document.getElementById("cam");
 const overlay = document.getElementById("handsOverlay");
 const octx = overlay.getContext("2d");
 const arena = document.getElementById("arenaCanvas");
-
-// Global debounce counter for fist detection
-let fistFrameCount = 0;
 
 // ---------- Camera ----------
 async function startCamera() {
@@ -26,7 +23,6 @@ async function startCamera() {
     audio: false,
   });
   video.srcObject = stream;
-  // Wait for metadata so we don't crash MediaPipe with 0-width video
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
       video.play().then(resolve);
@@ -480,8 +476,8 @@ function drawOverlay(landmarks) {
     octx.fillStyle = "#00e5ff";
     const show = [0, 5, 9, 13, 17, 4, 8, 12, 16, 20];
     for (const i of show) {
-      // MIRROR FIX: 1 - x
-      const x = (1 - lm[i].x) * overlay.width;
+      // FIXED: MATCH COORDINATES WITH CODE 2 (No Mirroring)
+      const x = lm[i].x * overlay.width;
       const y = lm[i].y * overlay.height;
       octx.beginPath();
       octx.arc(x, y, 2.5, 0, Math.PI * 2);
@@ -529,8 +525,9 @@ function onFrame() {
         lostFrames = 0;
         const lm = hands[0];
 
-        // MIRROR FIX: Flip X coordinate (1 - x)
-        const rawX = (1 - lm[8].x) * overlay.width;
+        // FIXED: Removed Mirroring (1 - x) to match Code 2
+        // This ensures Left-to-Right movements match the "Line" template
+        const rawX = lm[8].x * overlay.width;
         const rawY = lm[8].y * overlay.height;
 
         const fx = euroX.filter(rawX, now);
@@ -539,9 +536,8 @@ function onFrame() {
         const pointing = isPointing(lm);
         const fist = isFist(lm);
 
-        // --- DEBOUNCE LOGIC ---
+        // --- FIXED TRIGGER LOGIC ---
         if (pointing) {
-          fistFrameCount = 0; // Reset
           if (!drawing) {
             drawing = true;
             path.length = 0;
@@ -551,14 +547,11 @@ function onFrame() {
             x: clamp(fx, 0, overlay.width),
             y: clamp(fy, 0, overlay.height),
           });
-        } else if (fist) {
-          fistFrameCount++;
-          // Wait 5 frames to confirm fist (fixes accidentally breaking lines)
-          if (drawing && fistFrameCount > 5) {
-            drawing = false;
-            castFromPath();
-            fistFrameCount = 0;
-          }
+        } else if (fist && drawing) {
+          // FIXED: Immediate Trigger (Removed "Wait 5 frames" debounce)
+          // This matches Code 2's responsiveness.
+          drawing = false;
+          castFromPath();
         }
         // ----------------------
 
